@@ -1,5 +1,6 @@
 import unittest
 
+// 衣柜类
 class MyCloset:
     def __init__(self, size, params):
         self.storage_units = [StorageUnit(size=p) for p in params]
