@@ -1,0 +1,94 @@
+import unittest
+
+class MyCloset:
+    def __init__(self, size, params):
+        self.storage_units = [StorageUnit(size=p) for p in params]
+    
+    def split(self, params):
+        self.storage_units = [StorageUnit(size=p) for p in params]
+
+    def store(self, item):
+        for unit in self.storage_units:
+            if unit.has_space_for_item(item):
+                unit.store_item(item)
+                print(f"成功存储大小为 {item.size} 的物品。")
+                return True
+        print(f"存储大小为 {item.size} 的物品失败：没有足够空间。")
+        return False
+
+    def contains(self, item):
+        found = any(item in unit.items for unit in self.storage_units)
+        print(f"查找大小为 {item.size} 的物品：{'找到了' if found else '没找到'}")
+        return found
+    
+    def clear(self):
+        for unit in self.storage_units:
+            unit.clear()
+        print("清空衣柜完成。")
+
+class StorageUnit:
+    def __init__(self, size):
+        self.size = size
+        self.items = []
+
+    def store_item(self, item):
+        if self.has_space_for_item(item):
+            self.items.append(item)
+            return True
+        return False
+
+    def has_space_for_item(self, item):
+        space = sum(i.size for i in self.items) + item.size <= self.size
+        print(f"检查大小为 {item.size} 的物品是否有足够空间：{'有足够空间' if space else '空间不足'}")
+        return space
+    
+    def clear(self):
+        self.items.clear()
+        print("清空储物格完成。")
+
+class Item:
+    def __init__(self, size):
+        self.size = size
+
+class TestStorageLimits(unittest.TestCase):
+    def setUp(self):
+        self.closet = MyCloset(size=100, params=[10])
+        self.closet.split([10])
+        print("测试设置完成。")
+
+    def test_fill_storage_unit_exactly(self):
+        item = Item(size=10)
+        result = self.closet.store(item)
+        self.assertTrue(result)
+        self.assertTrue(self.closet.contains(item))
+
+    def test_overflow_storage_unit(self):
+        self.closet.store(Item(size=9))
+        result = self.closet.store(Item(size=2))
+        self.assertFalse(result)
+
+    def tearDown(self):
+        self.closet.clear()
+        print("测试清理完成。")
+
+class TestInvalidInput(unittest.TestCase):
+    def setUp(self):
+        self.closet = MyCloset(size=100, params=[10])
+        print("测试设置完成。")
+
+    def test_negative_size_item(self):
+        item = Item(size=-1)
+        result = self.closet.store(item)
+        self.assertFalse(result)
+
+    def test_zero_size_item(self):
+        item = Item(size=0)
+        result = self.closet.store(item)
+        self.assertFalse(result)
+
+    def tearDown(self):
+        self.closet.clear()
+        print("测试清理完成。")
+
+if __name__ == '__main__':
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
